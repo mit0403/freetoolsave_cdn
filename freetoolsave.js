@@ -26,20 +26,6 @@ async function getImageData() {
     });
 }
 
-/* not needed right now need if we want to store image.
-    async function sendBase64InFormData() {
-        const base64String = await getImageData(); // Using the function from before
-
-        if (base64String){
-
-            localStorage.setItem('logo', base64String);
-            console.log('image saved to localstorage');
-            return base64String;
-        }
-    }
-*/
-
-
 
 // ---------------------------------------------------------------
 //  some generic js.....
@@ -249,6 +235,10 @@ window.addEventListener("resize", () => {
 });
 
 
+//-------------------------------------
+// download button 
+//-------------------------------------
+
 const openBtn = document.getElementById("download-modal-trigger");
 const modal = document.querySelector(".download-modal-overlay");
 const closeBtn = document.querySelector(".download-modal-close");
@@ -265,10 +255,23 @@ openBtn.addEventListener("click", () => {
     document.body.style.overflow = "hidden";
     document.body.style.paddingRight = scrollBarWidth + "px";
 
+    /* ── Update modal labels based on $page_name set in the Blade template ── */
+    var pageName = window.downloadPageName || 'Invoice'; // fallback to "Invoice"
+    var action   = openBtn.getAttribute('data-action') || 'download';
+    var verb     = action === 'print' ? 'Print' : 'Download';
+
+    var titleEl    = document.getElementById('downloadModalTitle');
+    var subtitleEl = document.getElementById('downloadModalSubtitle');
+    var btnEl      = document.getElementById('downloadModalBtn');
+
+    if (titleEl)    titleEl.textContent    = verb + ' ' + pageName;
+    if (subtitleEl) subtitleEl.textContent = 'Please provide your information to ' + verb.toLowerCase() + ' the ' + pageName.toLowerCase();
+    if (btnEl)      btnEl.textContent      = verb + ' ' + pageName;
+    /* ──────────────────────────────────────────────────────────────────────── */
+
     modal.classList.add("active");
 });
 
-// Close modal
 // Close modal
 closeBtn.addEventListener("click", () => {
     modal.classList.remove("active");
@@ -284,7 +287,6 @@ closeBtn.addEventListener("click", () => {
         document.body.style.paddingRight = "";
     }, 300);
 });
-
 // custom js for field
 
 const countries = [{
@@ -829,7 +831,7 @@ $(document).ready(function (e) {
 
             const estimate_form = JSON.parse(localStorage.getItem('estimate_form'));
 
-            console.log(estimate_form);
+            // console.log(estimate_form);
 
 
             const data = {
@@ -1590,7 +1592,8 @@ $(document).ready(function (e) {
                 binaryString += String.fromCharCode(utf8Bytes[i]);
             }
             const base64Data = btoa(binaryString);
-            console.log("Base64 string generated safely.", base64Data);
+            console.log("Base64 string generated safely.");
+            // console.log(base64Data);
             // const parse_data = JSON.parse(localStorage.getItem('estimate_form'));
 
 
@@ -1619,7 +1622,7 @@ $(document).ready(function (e) {
                 .then(response => {
                     // 2. Extract the Base64 string from the "base" key
                     // We split at the comma to remove "data:application/pdf;base64,"
-                    console.log(response);
+                    // console.log(response);
 
 
                     // Check if the server actually returned the PDF data
@@ -1643,24 +1646,17 @@ $(document).ready(function (e) {
                         const pdfUrl = URL.createObjectURL(pdfBlob);
                         openPreview(pdfUrl);
 
-
-
                     } else {
                         // This handles your "Invoice not found" case
                         console.error("API Error Message:", response.message);
                         alert("Error: " + response.message);
                     }
 
-
-
-
                 })
                 .catch(err => {
                     console.error("Failed to process PDF:", err);
                     alert("Could not generate PDF. Check console for details.");
                 });
-
-
         }
     });
     // */
@@ -1669,7 +1665,6 @@ $(document).ready(function (e) {
         e.preventDefault();
         counter++;
         table_tr++;
-
 
         let text_box = '<tr class="instant_invoice_detail remove_row" id="delete_item_' + counter +
             '"><input type="hidden" name="product_id["' + (counter) +
