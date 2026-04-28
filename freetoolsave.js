@@ -287,6 +287,29 @@ if (printBtn) {
     });
 }
 
+// Handle click on the modal button (Download or Print)
+const downloadModalBtn = document.getElementById("downloadModalBtn");
+if (downloadModalBtn) {
+    downloadModalBtn.addEventListener("click", () => {
+        const action = downloadModalBtn.getAttribute('data-action');
+
+        if (action === 'print') {
+            // Call the existing printPDF function
+            printPDF();
+
+            // Close the modal after triggering print
+            if (modal) modal.classList.remove("active");
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
+        } else {
+            // This is the default "Download" behavior
+            // The existing lead capture logic (if any) should go here
+            console.log("Download action triggered");
+        }
+    });
+}
+
+
 // Close modal
 closeBtn.addEventListener("click", () => {
     modal.classList.remove("active");
