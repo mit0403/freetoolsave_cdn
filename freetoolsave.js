@@ -257,16 +257,14 @@ openBtn.addEventListener("click", () => {
 
     /* ── Update modal labels based on $page_name set in the Blade template ── */
     var pageName = window.downloadPageName || 'Invoice'; // fallback to "Invoice"
-    var action   = openBtn.getAttribute('data-action') || 'download';
-    var verb     = action === 'print' ? 'Print' : 'Download';
-
-    var titleEl    = document.getElementById('downloadModalTitle');
+    var action = openBtn.getAttribute('data-action') || 'download';
+    var verb = action === 'print' ? 'Print' : 'Download';
+    var titleEl = document.getElementById('downloadModalTitle');
     var subtitleEl = document.getElementById('downloadModalSubtitle');
-    var btnEl      = document.getElementById('downloadModalBtn');
-
-    if (titleEl)    titleEl.textContent    = verb + ' ' + pageName;
+    var btnEl = document.getElementById('downloadModalBtn');
+    if (titleEl) titleEl.textContent = verb + ' ' + pageName;
     if (subtitleEl) subtitleEl.textContent = 'Please provide your information to ' + verb.toLowerCase() + ' the ' + pageName.toLowerCase();
-    if (btnEl)      btnEl.textContent      = verb + ' ' + pageName;
+    if (btnEl) btnEl.textContent = verb + ' ' + pageName;
     /* ──────────────────────────────────────────────────────────────────────── */
 
     modal.classList.add("active");
