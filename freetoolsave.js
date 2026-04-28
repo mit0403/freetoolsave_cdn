@@ -270,6 +270,23 @@ openBtn.addEventListener("click", () => {
     modal.classList.add("active");
 });
 
+const printBtn = document.getElementById("print-modal-trigger");
+if (printBtn) {
+    printBtn.addEventListener("click", () => {
+        const scrollBarWidth = getScrollbarWidth();
+        document.body.style.overflow = "hidden";
+        document.body.style.paddingRight = scrollBarWidth + "px";
+        var pageName = window.downloadPageName || 'Invoice';
+        var titleEl = document.getElementById('downloadModalTitle');
+        var subtitleEl = document.getElementById('downloadModalSubtitle');
+        var btnEl = document.getElementById('downloadModalBtn');
+        if (titleEl) titleEl.textContent = 'Print ' + pageName;
+        if (subtitleEl) subtitleEl.textContent = 'Please provide your information to print the ' + pageName.toLowerCase();
+        if (btnEl) btnEl.textContent = 'Print ' + pageName;
+        modal.classList.add("active");
+    });
+}
+
 // Close modal
 closeBtn.addEventListener("click", () => {
     modal.classList.remove("active");
