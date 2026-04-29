@@ -345,6 +345,11 @@ closeBtn.addEventListener("click", () => {
         document.body.style.paddingRight = "";
     }, 300);
 });
+
+//-------------------------------------
+// download button completed.
+//-------------------------------------
+
 // custom js for field
 
 const countries = [{
