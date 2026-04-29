@@ -26,6 +26,20 @@ async function getImageData() {
     });
 }
 
+/* not needed right now need if we want to store image.
+    async function sendBase64InFormData() {
+        const base64String = await getImageData(); // Using the function from before
+
+        if (base64String){
+
+            localStorage.setItem('logo', base64String);
+            console.log('image saved to localstorage');
+            return base64String;
+        }
+    }
+*/
+
+
 
 // ---------------------------------------------------------------
 //  some generic js.....
@@ -264,12 +278,16 @@ openBtn.addEventListener("click", () => {
     var btnEl = document.getElementById('downloadModalBtn');
     if (titleEl) titleEl.textContent = verb + ' ' + pageName;
     if (subtitleEl) subtitleEl.textContent = 'Please provide your information to ' + verb.toLowerCase() + ' the ' + pageName.toLowerCase();
-    if (btnEl) btnEl.textContent = verb + ' ' + pageName;
+    if (btnEl) {
+        btnEl.textContent = verb + ' ' + pageName;
+        btnEl.setAttribute('data-action', action);
+    }
     /* ──────────────────────────────────────────────────────────────────────── */
 
     modal.classList.add("active");
 });
 
+// Print button — opens the same modal with "Print {page_name}" labels
 const printBtn = document.getElementById("print-modal-trigger");
 if (printBtn) {
     printBtn.addEventListener("click", () => {
@@ -282,7 +300,10 @@ if (printBtn) {
         var btnEl = document.getElementById('downloadModalBtn');
         if (titleEl) titleEl.textContent = 'Print ' + pageName;
         if (subtitleEl) subtitleEl.textContent = 'Please provide your information to print the ' + pageName.toLowerCase();
-        if (btnEl) btnEl.textContent = 'Print ' + pageName;
+        if (btnEl) {
+            btnEl.textContent = 'Print ' + pageName;
+            btnEl.setAttribute('data-action', 'print');
+        }
         modal.classList.add("active");
     });
 }
@@ -309,7 +330,6 @@ if (downloadModalBtn) {
     });
 }
 
-
 // Close modal
 closeBtn.addEventListener("click", () => {
     modal.classList.remove("active");
@@ -325,6 +345,11 @@ closeBtn.addEventListener("click", () => {
         document.body.style.paddingRight = "";
     }, 300);
 });
+
+//-------------------------------------
+// download button completed.
+//-------------------------------------
+
 // custom js for field
 
 const countries = [{
@@ -576,13 +601,13 @@ $(document).ready(function (e) {
     // Set Currency 
     // https://betaapp.mooninvoice.com/live_webapp/get_currencies_public
 
-    
+
     $.ajax({
-        
+
         url: webapp_url + 'get_currencies_public',
         type: "POST",
         success: function (data) {
-            console.log(data);
+            // console.log(data);
             try {
                 var jss = typeof data === 'string' ? JSON.parse(data) : data;
                 if (jss && jss.data) {
@@ -869,7 +894,7 @@ $(document).ready(function (e) {
 
             const estimate_form = JSON.parse(localStorage.getItem('estimate_form'));
 
-            // console.log(estimate_form);
+            console.log(estimate_form);
 
 
             const data = {
@@ -1630,8 +1655,7 @@ $(document).ready(function (e) {
                 binaryString += String.fromCharCode(utf8Bytes[i]);
             }
             const base64Data = btoa(binaryString);
-            console.log("Base64 string generated safely.");
-            // console.log(base64Data);
+            console.log("Base64 string generated safely.", base64Data);
             // const parse_data = JSON.parse(localStorage.getItem('estimate_form'));
 
 
@@ -1660,7 +1684,7 @@ $(document).ready(function (e) {
                 .then(response => {
                     // 2. Extract the Base64 string from the "base" key
                     // We split at the comma to remove "data:application/pdf;base64,"
-                    // console.log(response);
+                    console.log(response);
 
 
                     // Check if the server actually returned the PDF data
@@ -1684,17 +1708,24 @@ $(document).ready(function (e) {
                         const pdfUrl = URL.createObjectURL(pdfBlob);
                         openPreview(pdfUrl);
 
+
+
                     } else {
                         // This handles your "Invoice not found" case
                         console.error("API Error Message:", response.message);
                         alert("Error: " + response.message);
                     }
 
+
+
+
                 })
                 .catch(err => {
                     console.error("Failed to process PDF:", err);
                     alert("Could not generate PDF. Check console for details.");
                 });
+
+
         }
     });
     // */
@@ -1703,6 +1734,7 @@ $(document).ready(function (e) {
         e.preventDefault();
         counter++;
         table_tr++;
+
 
         let text_box = '<tr class="instant_invoice_detail remove_row" id="delete_item_' + counter +
             '"><input type="hidden" name="product_id["' + (counter) +
