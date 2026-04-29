@@ -589,7 +589,7 @@ $(document).ready(function (e) {
         url: webapp_url + 'get_currencies_public',
         type: "POST",
         success: function (data) {
-            console.log(data);
+            // console.log(data);
             try {
                 var jss = typeof data === 'string' ? JSON.parse(data) : data;
                 if (jss && jss.data) {
@@ -1638,7 +1638,7 @@ $(document).ready(function (e) {
             }
             const base64Data = btoa(binaryString);
             console.log("Base64 string generated safely.");
-            console.log(base64Data);
+            // console.log(base64Data);
             // const parse_data = JSON.parse(localStorage.getItem('estimate_form'));
 
 
