@@ -26,6 +26,7 @@ async function getImageData() {
     });
 }
 
+
 // ---------------------------------------------------------------
 //  some generic js.....
 // --------------------------------------------------------------- 
@@ -238,7 +239,33 @@ window.addEventListener("resize", () => {
 // download button 
 //-------------------------------------
 
+/**
+ * Perform direct download or print action
+ * @param {string} action - 'download' or 'print'
+ */
+window.performDocumentAction = function(action) {
+    if (typeof pdfContent !== 'undefined' && pdfContent) {
+        if (action === 'print') {
+            if (typeof printPDF === 'function') {
+                printPDF();
+            } else {
+                console.error("printPDF function not found");
+            }
+        } else {
+            const link = document.createElement('a');
+            link.href = pdfContent;
+            link.download = (window.downloadPageName || 'Document') + '.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    } else {
+        alert('PDF content is not ready. Please wait or try again.');
+    }
+};
+
 const openBtn = document.getElementById("download-modal-trigger");
+
 const modal = document.querySelector(".download-modal-overlay");
 const closeBtn = document.querySelector(".download-modal-close");
 
@@ -248,8 +275,16 @@ function getScrollbarWidth() {
 }
 
 // Open modal
-openBtn.addEventListener("click", () => {
+openBtn.addEventListener("click", (e) => {
+    // Bypass modal if user has already submitted
+    if (localStorage.getItem('user_submit') == 'true' || window.user_submitted) {
+        const action = openBtn.getAttribute('data-action') || 'download';
+        performDocumentAction(action);
+        return;
+    }
+
     const scrollBarWidth = getScrollbarWidth();
+
 
     document.body.style.overflow = "hidden";
     document.body.style.paddingRight = scrollBarWidth + "px";
@@ -275,8 +310,15 @@ openBtn.addEventListener("click", () => {
 // Print button — opens the same modal with "Print {page_name}" labels
 const printBtn = document.getElementById("print-modal-trigger");
 if (printBtn) {
-    printBtn.addEventListener("click", () => {
+    printBtn.addEventListener("click", (e) => {
+        // Bypass modal if user has already submitted
+        if (localStorage.getItem('user_submit') == 'true' || window.user_submitted) {
+            performDocumentAction('print');
+            return;
+        }
+
         const scrollBarWidth = getScrollbarWidth();
+
         document.body.style.overflow = "hidden";
         document.body.style.paddingRight = scrollBarWidth + "px";
         var pageName = window.downloadPageName || 'Invoice';
@@ -295,27 +337,27 @@ if (printBtn) {
 
 // Handle click on the modal button (Download or Print)
 const downloadModalBtn = document.getElementById("downloadModalBtn");
-// if (downloadModalBtn) {
-//     downloadModalBtn.addEventListener("click", () => {
-//         const action = downloadModalBtn.getAttribute('data-action');
+if (downloadModalBtn) {
+    downloadModalBtn.addEventListener("click", () => {
+        const action = downloadModalBtn.getAttribute('data-action');
 
-//         // console.log(action);
+        // console.log(action); 
 
-//         if (action === 'print') {
-//             // Call the existing printPDF function
-//             // printPDF();
+        if (action === 'print') {
+            // Call the existing printPDF function
+            // printPDF();
 
-//             // Close the modal after triggering print
-//             if (modal) modal.classList.remove("active");
-//             document.body.style.overflow = "";
-//             document.body.style.paddingRight = "";
-//         } else {
-//             // This is the default "Download" behavior
-//             // The existing lead capture logic (if any) should go here
-//             console.log("Download action triggered");
-//         }
-//     });
-// }
+            // Close the modal after triggering print
+            if (modal) modal.classList.remove("active");
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
+        } else {
+            // This is the default "Download" behavior
+            // The existing lead capture logic (if any) should go here
+            console.log("Download action triggered");
+        }
+    });
+}
 
 // Close modal
 closeBtn.addEventListener("click", () => {
@@ -1637,8 +1679,7 @@ $(document).ready(function (e) {
                 binaryString += String.fromCharCode(utf8Bytes[i]);
             }
             const base64Data = btoa(binaryString);
-            console.log("Base64 string generated safely.");
-            // console.log(base64Data);
+            console.log("Base64 string generated safely.", base64Data);
             // const parse_data = JSON.parse(localStorage.getItem('estimate_form'));
 
 
