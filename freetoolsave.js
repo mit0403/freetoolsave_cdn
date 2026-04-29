@@ -26,7 +26,6 @@ async function getImageData() {
     });
 }
 
-
 // ---------------------------------------------------------------
 //  some generic js.....
 // --------------------------------------------------------------- 
@@ -264,12 +263,16 @@ openBtn.addEventListener("click", () => {
     var btnEl = document.getElementById('downloadModalBtn');
     if (titleEl) titleEl.textContent = verb + ' ' + pageName;
     if (subtitleEl) subtitleEl.textContent = 'Please provide your information to ' + verb.toLowerCase() + ' the ' + pageName.toLowerCase();
-    if (btnEl) btnEl.textContent = verb + ' ' + pageName;
+    if (btnEl) {
+        btnEl.textContent = verb + ' ' + pageName;
+        btnEl.setAttribute('data-action', action);
+    }
     /* ──────────────────────────────────────────────────────────────────────── */
 
     modal.classList.add("active");
 });
 
+// Print button — opens the same modal with "Print {page_name}" labels
 const printBtn = document.getElementById("print-modal-trigger");
 if (printBtn) {
     printBtn.addEventListener("click", () => {
@@ -282,7 +285,10 @@ if (printBtn) {
         var btnEl = document.getElementById('downloadModalBtn');
         if (titleEl) titleEl.textContent = 'Print ' + pageName;
         if (subtitleEl) subtitleEl.textContent = 'Please provide your information to print the ' + pageName.toLowerCase();
-        if (btnEl) btnEl.textContent = 'Print ' + pageName;
+        if (btnEl) {
+            btnEl.textContent = 'Print ' + pageName;
+            btnEl.setAttribute('data-action', 'print');
+        }
         modal.classList.add("active");
     });
 }
@@ -293,6 +299,8 @@ if (downloadModalBtn) {
     downloadModalBtn.addEventListener("click", () => {
         const action = downloadModalBtn.getAttribute('data-action');
 
+        // console.log(action);
+        
         if (action === 'print') {
             // Call the existing printPDF function
             printPDF();
@@ -308,10 +316,6 @@ if (downloadModalBtn) {
         }
     });
 }
-
-//-------------------------------------
-// download button finished.
-//-------------------------------------
 
 // Close modal
 closeBtn.addEventListener("click", () => {
@@ -579,13 +583,13 @@ $(document).ready(function (e) {
     // Set Currency 
     // https://betaapp.mooninvoice.com/live_webapp/get_currencies_public
 
-    
+
     $.ajax({
-        
+
         url: webapp_url + 'get_currencies_public',
         type: "POST",
         success: function (data) {
-            console.log(data);
+            // console.log(data);
             try {
                 var jss = typeof data === 'string' ? JSON.parse(data) : data;
                 if (jss && jss.data) {
@@ -1663,7 +1667,7 @@ $(document).ready(function (e) {
                 .then(response => {
                     // 2. Extract the Base64 string from the "base" key
                     // We split at the comma to remove "data:application/pdf;base64,"
-                    // console.log(response);
+                    console.log(response);
 
 
                     // Check if the server actually returned the PDF data
@@ -1687,17 +1691,24 @@ $(document).ready(function (e) {
                         const pdfUrl = URL.createObjectURL(pdfBlob);
                         openPreview(pdfUrl);
 
+
+
                     } else {
                         // This handles your "Invoice not found" case
                         console.error("API Error Message:", response.message);
                         alert("Error: " + response.message);
                     }
 
+
+
+
                 })
                 .catch(err => {
                     console.error("Failed to process PDF:", err);
                     alert("Could not generate PDF. Check console for details.");
                 });
+
+
         }
     });
     // */
@@ -1706,6 +1717,7 @@ $(document).ready(function (e) {
         e.preventDefault();
         counter++;
         table_tr++;
+
 
         let text_box = '<tr class="instant_invoice_detail remove_row" id="delete_item_' + counter +
             '"><input type="hidden" name="product_id["' + (counter) +
