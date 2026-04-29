@@ -300,7 +300,7 @@ if (downloadModalBtn) {
         const action = downloadModalBtn.getAttribute('data-action');
 
         // console.log(action);
-        
+
         if (action === 'print') {
             // Call the existing printPDF function
             printPDF();
@@ -589,7 +589,7 @@ $(document).ready(function (e) {
         url: webapp_url + 'get_currencies_public',
         type: "POST",
         success: function (data) {
-            // console.log(data);
+            console.log(data);
             try {
                 var jss = typeof data === 'string' ? JSON.parse(data) : data;
                 if (jss && jss.data) {
@@ -1638,7 +1638,7 @@ $(document).ready(function (e) {
             }
             const base64Data = btoa(binaryString);
             console.log("Base64 string generated safely.");
-            // console.log(base64Data);
+            console.log(base64Data);
             // const parse_data = JSON.parse(localStorage.getItem('estimate_form'));
 
 
@@ -1667,7 +1667,7 @@ $(document).ready(function (e) {
                 .then(response => {
                     // 2. Extract the Base64 string from the "base" key
                     // We split at the comma to remove "data:application/pdf;base64,"
-                    console.log(response);
+                    // console.log(response);
 
 
                     // Check if the server actually returned the PDF data
@@ -1690,7 +1690,7 @@ $(document).ready(function (e) {
                         // 4. Create a local URL for the PDF
                         const pdfUrl = URL.createObjectURL(pdfBlob);
                         openPreview(pdfUrl);
-
+                        window.pdfContent = pdfUrl;
 
 
                     } else {
@@ -1698,9 +1698,6 @@ $(document).ready(function (e) {
                         console.error("API Error Message:", response.message);
                         alert("Error: " + response.message);
                     }
-
-
-
 
                 })
                 .catch(err => {
