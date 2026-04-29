@@ -309,6 +309,9 @@ if (downloadModalBtn) {
     });
 }
 
+//-------------------------------------
+// download button finished.
+//-------------------------------------
 
 // Close modal
 closeBtn.addEventListener("click", () => {
