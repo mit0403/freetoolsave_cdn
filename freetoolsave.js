@@ -26,7 +26,6 @@ async function getImageData() {
     });
 }
 
-
 // ---------------------------------------------------------------
 //  some generic js.....
 // --------------------------------------------------------------- 
@@ -1679,7 +1678,8 @@ $(document).ready(function (e) {
                 binaryString += String.fromCharCode(utf8Bytes[i]);
             }
             const base64Data = btoa(binaryString);
-            console.log("Base64 string generated safely.", base64Data);
+            console.log("Base64 string generated safely.");
+            // console.log(base64Data);
             // const parse_data = JSON.parse(localStorage.getItem('estimate_form'));
 
 
@@ -1708,7 +1708,7 @@ $(document).ready(function (e) {
                 .then(response => {
                     // 2. Extract the Base64 string from the "base" key
                     // We split at the comma to remove "data:application/pdf;base64,"
-                    // console.log(response);
+                    console.log(response);
 
 
                     // Check if the server actually returned the PDF data
