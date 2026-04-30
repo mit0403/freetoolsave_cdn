@@ -242,7 +242,7 @@ window.addEventListener("resize", () => {
  * Perform direct download or print action
  * @param {string} action - 'download' or 'print'
  */
-window.performDocumentAction = function(action) {
+window.performDocumentAction = function (action) {
     if (typeof pdfContent !== 'undefined' && pdfContent) {
         if (action === 'print') {
             if (typeof printPDF === 'function') {
@@ -1708,7 +1708,7 @@ $(document).ready(function (e) {
                 .then(response => {
                     // 2. Extract the Base64 string from the "base" key
                     // We split at the comma to remove "data:application/pdf;base64,"
-                    console.log(response);
+                    // console.log(response);
 
 
                     // Check if the server actually returned the PDF data
@@ -2216,4 +2216,161 @@ function printPDF() {
 }
 
 
+
+//-------------------------------------------------
+// download and print pdf code..
+//-------------------------------------------------
+function validateField(field) {
+    let isValid = true;
+
+    if (field === 'name' || field === 'all') {
+        const name = $('#name').val().trim();
+        const $group = $('#nameGroup');
+        if (!name) {
+            $group.addClass('error');
+            isValid = false;
+        } else {
+            $group.removeClass('error');
+        }
+    }
+
+    if (field === 'email' || field === 'all') {
+        const email = $('#email').val().trim();
+        const $group = $('#emailGroup');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) {
+            $group.addClass('error');
+            $group.find('.login-error-message').text('Email is required.');
+            isValid = false;
+        } else if (!emailRegex.test(email)) {
+            $group.addClass('error');
+            $group.find('.login-error-message').text('Please enter a valid email.');
+            isValid = false;
+        } else {
+            $group.removeClass('error');
+        }
+    }
+
+    if (field === 'phone' || field === 'all') {
+        const phone = $('#phone').val().trim();
+        const $group = $('#phoneGroup');
+        if (!phone) {
+            $group.addClass('error');
+            isValid = false;
+        } else {
+            $group.removeClass('error');
+        }
+    }
+
+    if (field === 'jobRole' || field === 'all') {
+        const jobRole = $('#jobRoleValue').text().trim();
+        const $group = $('#jobRoleGroup');
+        if (!jobRole) {
+            $group.addClass('error');
+            isValid = false;
+        } else {
+            $group.removeClass('error');
+        }
+    }
+
+    return isValid;
+}
+
+$(document).ready(function () {
+    // Remove default error classes on page load
+    $('.login-input-groups.error, .download-modal-field.error').removeClass('error');
+
+    // Attach blur events
+    $('#name').on('blur', function () {
+        validateField('name');
+    });
+
+    // Job Role Selection Handler
+    $('.download-modal-option').on('click', function () {
+        const val = $(this).data('value');
+        const text = $(this).text();
+        $('#jobRoleValue').text(text);
+        $('#jobRoleInput').val(val);
+        $('#jobRolePanel').hide();
+        validateField('jobRole');
+    });
+
+    $('#jobRoleTrigger').on('click', function (e) {
+        e.stopPropagation();
+        $('#jobRolePanel').toggle();
+    });
+
+    $(document).on('click', function () {
+        $('#jobRolePanel').hide();
+    });
+
+
+    // Handle submission
+    $('#downloadForm').on('submit', function (e) {
+        e.preventDefault();
+
+        const $btn = $('#downloadModalBtn');
+        const action = $btn.attr('data-action');
+
+        if (validateField('all')) {
+            const originalText = $btn.text();
+            $btn.text('Processing...').prop('disabled', true);
+
+            const formData = {
+                name: $('#name').val().trim(),
+                email: $('#email').val().trim(),
+                phone: $('#phone').val().trim(),
+                designation: $('#jobRoleValue').text().trim(),
+                medium: "{{ $page_name }}"
+            };
+
+            const jsonString = JSON.stringify(formData);
+            const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
+            $('#encoded_data').val(base64Data);
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    request: $('#encoded_data').val()
+                },
+                success: function (response) {
+                    $btn.text(originalText).prop('disabled', false);
+
+                    let res = typeof response === 'string' ? JSON.parse(response) :
+                        response;
+
+                    if (res.status == 200) {
+                        // Set submission flags
+                        localStorage.setItem('user_submit', 'true');
+                        window.user_submitted = true;
+
+                        // Close modal
+                        $('.download-modal-overlay').removeClass('active');
+                        $('body').css({
+                            overflow: '',
+                            paddingRight: ''
+                        });
+
+                        // Perform the document action (using centralized function in freetoolsave.js)
+                        if (typeof performDocumentAction === 'function') {
+                            performDocumentAction(action);
+                        }
+                    } else {
+                        alert(res.message ||
+                            'Validation failed. Please check your inputs.');
+                    }
+
+                },
+                error: function (xhr) {
+                    $btn.text(originalText).prop('disabled', false);
+                    console.error('Error submitting form data:', xhr.responseText);
+                    alert('Something went wrong. Please try again.');
+                }
+            });
+        }
+    });
+
+});
 
