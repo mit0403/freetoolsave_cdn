@@ -933,7 +933,7 @@ $(document).ready(function (e) {
             
 
 
-            const data = {
+           const data = {
 
                 "pageSize": "A4",
                 "customerID": "",
@@ -1404,50 +1404,37 @@ $(document).ready(function (e) {
                         "task_quantity_label": "Quantity",
                         "sac_header": "SAC",
                         "task_rate_label": "Rate",
-                        "task_data": (estimate_form['task_name[]']) ? [estimate_form['task_name[]']].flat().map((name, i) => {
-                            let taskname = [estimate_form["task_name[]"]].flat()[i] ||
-                                "";
-                            let taxamount = Number([estimate_form["tasktaxrate[]"]]
-                                .flat()[i]) ||
-                                '';
-                            let taskamount = Number([estimate_form["task_rate[]"]]
-                                .flat()[i]) ||
-                                '';
-                            let taskquantity = Number([estimate_form["task_quantity[]"]]
-                                .flat()[
-                                i
-                            ]) || '';
-                            let taskdesc = [estimate_form["task_description[]"]].flat()[
-                                i] || "";
-                            let tasktaxperunit = Number([estimate_form["tasktaxrate[]"]]
-                                .flat()[
-                                i
-                            ]) || '';
-                            // 3. LOGIC: Calculate amount (Rate * Qty)
-                            // const totalAmount = tRate * tQty;
+                        "task_data": estimate_form['task_name[]']
+                                    ? [estimate_form['task_name[]']]
+                                        .flat()
+                                        .map((name, i) => {
+                                            if (name !== '') {
+                                            return {
+                                                task_name: name,
+                                                task_project: name,
+                                                task_unit: "",
+                                                task_discount: "",
+                                                task_used_tax: [{
+                                                tax_name: "GST",
+                                                tax_amount: Number([estimate_form["tasktaxrate[]"]].flat()[i]) || '',
+                                                tax_rate: Number([estimate_form["tasktaxrate[]"]].flat()[i]) || '',
+                                                tax_types: "%",
+                                                tax_id: "82A4E33B-9598-44BA-A9FF-AA6A77218C01"
+                                                }],
+                                                task_amount: Number([estimate_form["task_rate[]"]].flat()[i]) || '',
+                                                task_rate: Number([estimate_form["task_rate[]"]].flat()[i]) || '',
+                                                task_quantity: Number([estimate_form["task_quantity[]"]].flat()[i]) || '',
+                                                sac_value: "",
+                                                task_inline_note: [estimate_form["task_description[]"]].flat()[i] || "",
+                                                task_inline_date: "",
+                                                task_tax_per_unit: Number([estimate_form["tasktaxrate[]"]].flat()[i]) || '',
+                                                task_tax_total: Number([estimate_form["tasktaxrate[]"]].flat()[i]) || ''
+                                            };
+                                            }
+                                        })
+                                        .filter(Boolean) // removes undefined/null (this will return clean array.)
 
-                            return {
-                                "task_name": taskname,
-                                "task_project": taskname,
-                                "task_unit": "",
-                                "task_discount": "",
-                                "task_used_tax": [{
-                                    "tax_name": "GST",
-                                    "tax_amount": taxamount,
-                                    "tax_rate": taxamount,
-                                    "tax_types": "%",
-                                    "tax_id": "82A4E33B-9598-44BA-A9FF-AA6A77218C01"
-                                }],
-                                "task_amount": taskamount,
-                                "task_rate": taskamount,
-                                "task_quantity": taskquantity,
-                                "sac_value": "",
-                                "task_inline_note": taskdesc,
-                                "task_inline_date": "",
-                                "task_tax_per_unit": tasktaxperunit,
-                                "task_tax_total": tasktaxperunit
-                            }
-                        }) : [],
+                                    : [],
 
 
                         "task_table_style": {
@@ -1490,59 +1477,65 @@ $(document).ready(function (e) {
                         "product_amount_label": "Amount",
                         "product_serial_no_label": "Serial/IMEI",
 
-                        "product_data":(estimate_form["product_name[]"]) ? [estimate_form["product_name[]"]].flat().map((name,
+                        "product_data": (estimate_form["product_name[]"]) ? [estimate_form["product_name[]"]].flat().map((name,
                             i) => {
                             // 1. Capture the values from parallel arrays using index [i]
                             // We use Number() to ensure calculations work, and || 0 as a fallback
-                            const qty = Number([estimate_form["quantity[]"]].flat()[
-                                i] || 0);
-                            const total = Number([estimate_form["product_total[]"]]
-                                .flat()[i] ||
-                                0);
-                            const taxTotal = Number([estimate_form["producttaxrate[]"]]
-                                .flat()[
-                                i
-                            ] || 0);
-                            const itemCode = [estimate_form["product_id[]"]].flat() ? [
-                                estimate_form["product_id[]"]
-                            ].flat()[i] : "";
-                            const description = [estimate_form["product_description[]"]]
-                                .flat()[
-                                i
-                            ] || "";
 
-                            // 2. Calculate Unit Price (Total / Quantity)
-                            const unitPrice = qty > 0 ? (total / qty).toFixed(2) :
-                                "0.00";
+                            if(name !== ''){
 
-                            // 3. Return the row object
-                            return {
-                                "product_name": name,
-                                "product_item_code": itemCode,
-                                "hsn_value": "HSN0001",
-                                "serial_no_value": "AB01,AB02",
-                                "product_quantity": qty.toString(),
-                                "product_unit": "",
-                                "product_unitprice": unitPrice,
-                                "product_discount": "5",
-                                "product_image": "",
-                                "product_used_tax": [{
-                                    "tax_name": estimate_form[
-                                        "producttaxname[]"][i] || "GST",
-                                    "tax_amount": taxTotal,
-                                    "tax_id": "82A4E33B-9598-44BA-A9FF-AA6A77218C01",
-                                    "tax_rate": taxTotal.toString(),
-                                    "tax_types": "%"
-                                }],
-                                "product_amount": total.toString(),
-                                "product_with_tax_amount": (total + taxTotal)
-                                    .toString(),
-                                "product_without_tax_amount": total.toString(),
-                                "product_inline_note": description,
-                                "product_tax_per_unit": null,
-                                "product_tax_total": taxTotal
-                            };
-                        }) : [],
+                          
+                                const qty = Number([estimate_form["quantity[]"]].flat()[
+                                    i] || '');
+                                const total = Number([estimate_form["product_total[]"]]
+                                    .flat()[i] ||
+                                    '');
+                                const taxTotal = Number([estimate_form["producttaxrate[]"]]
+                                    .flat()[
+                                    i
+                                ] || '');
+                                const itemCode = [estimate_form["product_id[]"]].flat() ? [
+                                    estimate_form["product_id[]"]
+                                ].flat()[i] : "";
+                                const description = [estimate_form["product_description[]"]]
+                                    .flat()[
+                                    i
+                                ] || "";
+
+                                // 2. Calculate Unit Price (Total / Quantity)
+                                const unitPrice = qty > 0 ? (total / qty).toFixed(2) :
+                                    "0.00";
+
+                                // 3. Return the row object
+                                return {
+                                    "product_name": name,
+                                    "product_item_code": itemCode,
+                                    "hsn_value": "",
+                                    "serial_no_value": "",
+                                    "product_quantity": qty.toString(),
+                                    "product_unit": "",
+                                    "product_unitprice": unitPrice,
+                                    "product_discount": "",
+                                    "product_image": "",
+                                    "product_used_tax": [{
+                                        "tax_name": estimate_form[
+                                            "producttaxname[]"][i] || "GST",
+                                        "tax_amount": taxTotal,
+                                        "tax_id": "82A4E33B-9598-44BA-A9FF-AA6A77218C01",
+                                        "tax_rate": taxTotal.toString(),
+                                        "tax_types": "%"
+                                    }],
+                                    "product_amount": total.toString(),
+                                    "product_with_tax_amount": (total + taxTotal)
+                                        .toString(),
+                                    "product_without_tax_amount": total.toString(),
+                                    "product_inline_note": description,
+                                    "product_tax_per_unit": null,
+                                    "product_tax_total": taxTotal
+                                }; 
+                            }
+                            
+                        }).filter(Boolean) : [],
 
                         "product_unitprice_label": "Unit Price",
                         "product_discount_label": "Discount",
