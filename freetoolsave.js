@@ -644,7 +644,7 @@ $(document).ready(function (e) {
         url: webapp_url + 'get_currencies_public',
         type: "POST",
         success: function (data) {
-            // console.log(data);
+            
             try {
                 var jss = typeof data === 'string' ? JSON.parse(data) : data;
                 if (jss && jss.data) {
@@ -953,7 +953,7 @@ $(document).ready(function (e) {
 
                 $('.preview-pdf').text(estimate_form.customer_invoice);     // to change pdf title dynamically.
 
-                // console.log(estimate_form);
+                
 
 
                 const data = {
@@ -1702,6 +1702,8 @@ $(document).ready(function (e) {
                 }
 
 
+                // console.log(data);
+
                 const jsonString = JSON.stringify(data);
 
                 // convert json to base64 safely without spread operator.
@@ -1735,7 +1737,7 @@ $(document).ready(function (e) {
                     .then(response => {
                         // 2. Extract the Base64 string from the "base" key
                         // We split at the comma to remove "data:application/pdf;base64,"
-                        // console.log(response);
+                        
 
 
                         // Check if the server actually returned the PDF data
