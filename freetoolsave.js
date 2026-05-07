@@ -267,7 +267,7 @@ window.performDocumentAction = function (action) {
         } else {
             const link = document.createElement('a');
             link.href = pdfContent;
-            link.download = (window.downloadPageName || 'Document') + '.pdf';
+            link.download = (window.downloadPageName.charAt(0).toUpperCase() + downloadPageName.slice(1) + ' '+ window.pdfname  || 'Document') + '.pdf';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -644,7 +644,7 @@ $(document).ready(function (e) {
         url: webapp_url + 'get_currencies_public',
         type: "POST",
         success: function (data) {
-            
+            // console.log(data);
             try {
                 var jss = typeof data === 'string' ? JSON.parse(data) : data;
                 if (jss && jss.data) {
@@ -953,7 +953,9 @@ $(document).ready(function (e) {
 
                 $('.preview-pdf').text(estimate_form.customer_invoice);     // to change pdf title dynamically.
 
-                
+                window.pdfname = estimate_form.customer_invoice;
+
+                // console.log(estimate_form);
 
 
                 const data = {
@@ -962,7 +964,7 @@ $(document).ready(function (e) {
                     "customerID": "",
                     "PDFSettingsforInvoice": {
                         "serial_no_label": "Sr. No.",
-                        "report_type": "2",
+                        "report_type": "1",
                         "Status_on_off": 1,
                         "full_pdf": "1",
                         "custom_template": "0",
@@ -1073,7 +1075,7 @@ $(document).ready(function (e) {
                         "V_Lines": 1,
                         "Due_Date": 1,
                         "product_discount": 1,
-                        "Payment_Details_Invoice": 1,
+                        "Payment_Details_Invoice": 0,
                         "Invoice_Number": 1,
                         "CreditNote_Number_invoice": 0,
                         "invoice_Number_creditnote": 0,
@@ -1225,10 +1227,10 @@ $(document).ready(function (e) {
                             }],
                             "invoice_total": estimate_form["total_with_tax_and_price[]"] ?? 0,
                             // date title 
-                            "invoice_date_label": page_name,
-                            "invoice_po_number": "852",
-                            "invoice_number": "MTPL001619",
-                            "invoice_duedate": estimate_form.customer_date,
+                            "invoice_date_label": page_name.charAt(0).toUpperCase() + page_name.slice(1) + " #",
+                            "invoice_po_number": "",
+                            "invoice_number": "",
+                            "invoice_duedate": estimate_form.customer_due_date ?? '',
                             "estimate_number_label": "Estimate #"
                         },
                         "notes": {
@@ -1319,64 +1321,7 @@ $(document).ready(function (e) {
                         "einvoice": "",
                         "invoice_hyperlink": "Created by",
                         "payment_methods": {
-                            "payment_method_all_image": [{
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            },
-                            {
-                                "payment_method_image": ""
-                            }
-                            ],
+                            "payment_method_all_image": [],
                             "paynow_image": "",
                             "paynow_image_link": "",
                             "payment_methods_label": "We accept payment by"
@@ -1701,6 +1646,7 @@ $(document).ready(function (e) {
                     "Vertical": "2"
                 }
 
+                //  console.log(estimate_form.customer_due_date);
 
                 // console.log(data);
 
@@ -1713,7 +1659,7 @@ $(document).ready(function (e) {
                     binaryString += String.fromCharCode(utf8Bytes[i]);
                 }
                 const base64Data = btoa(binaryString);
-                console.log("Base64 string generated safely.");
+                console.log("Base64 string generated safely.", base64Data);
                 // const parse_data = JSON.parse(localStorage.getItem('estimate_form'));
 
 
@@ -1737,7 +1683,7 @@ $(document).ready(function (e) {
                     .then(response => {
                         // 2. Extract the Base64 string from the "base" key
                         // We split at the comma to remove "data:application/pdf;base64,"
-                        
+                        console.log(response);
 
 
                         // Check if the server actually returned the PDF data
@@ -1796,6 +1742,8 @@ $(document).ready(function (e) {
 
     });
     // */
+
+   
 
     $(".add_product").on('click', function (e) {
         e.preventDefault();
