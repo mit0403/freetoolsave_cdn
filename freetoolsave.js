@@ -375,17 +375,18 @@ if (downloadModalBtn) {
 // Close modal
 closeBtn.addEventListener("click", () => {
     modal.classList.remove("active");
-
     jobValue.innerText = "";
-
     jobGroup.classList.remove("active", "open");
-
     jobOptions.forEach(opt => opt.classList.remove('active'));
-
     setTimeout(() => {
         document.body.style.overflow = "";
         document.body.style.paddingRight = "";
     }, 300);
+     
+    // reset download modal.    
+    document.getElementById("downloadForm").reset();
+        
+    
 });
 // custom js for field
 
@@ -1659,7 +1660,7 @@ $(document).ready(function (e) {
                     binaryString += String.fromCharCode(utf8Bytes[i]);
                 }
                 const base64Data = btoa(binaryString);
-                console.log("Base64 string generated safely.", base64Data);
+                console.log("Base64 string generated safely.");
                 // const parse_data = JSON.parse(localStorage.getItem('estimate_form'));
 
 
@@ -1683,7 +1684,7 @@ $(document).ready(function (e) {
                     .then(response => {
                         // 2. Extract the Base64 string from the "base" key
                         // We split at the comma to remove "data:application/pdf;base64,"
-                        console.log(response);
+                        // console.log(response);
 
 
                         // Check if the server actually returned the PDF data
@@ -2122,56 +2123,100 @@ window.onload = function () { }
 
 
 
+
 // ---------------------------------------------------------------
 // model preview and print pdf .....
 // ---------------------------------------------------------------
 
 
-function openPreview(pdfUrl) {
-    // currentPdfUrl = pdfUrl;
+// function openPreview(pdfUrl) {
+//     // currentPdfUrl = pdfUrl;
 
-    const backdrop = document.getElementById('uniquePreviewBackdrop');
-    const loader = document.getElementById('previewLoadingOverlay');
+//     const backdrop = document.getElementById('uniquePreviewBackdrop');
+//     const loader = document.getElementById('previewLoadingOverlay');
 
-    // Ensure modal is visible and loader is shown
-    if (backdrop) backdrop.style.display = 'flex';
-    if (loader) loader.classList.remove('preview-hidden');
+//     // Ensure modal is visible and loader is shown
+//     if (backdrop) backdrop.style.display = 'flex';
+//     if (loader) loader.classList.remove('preview-hidden');
+
+//     const pdfjsLib = window['pdfjsLib'];
+//     pdfjsLib.GlobalWorkerOptions.workerSrc =
+//         'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+//     pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+//         pdf.getPage(1).then(page => {
+
+//             const canvas = document.getElementById('pdfCanvas');
+//             const context = canvas.getContext('2d');
+//             const container = document.querySelector('.pdf-scroll-container');
+
+//             const viewport = page.getViewport({
+//                 scale: 1
+//             });
+
+//             const scale = container.clientWidth / viewport.width;
+//             const scaledViewport = page.getViewport({
+//                 scale
+//             });
+
+//             canvas.width = scaledViewport.width;
+//             canvas.height = scaledViewport.height;
+
+//             page.render({
+//                 canvasContext: context,
+//                 viewport: scaledViewport
+//             }).promise.then(() => {
+//                 // ✅ Rendering Complete: Hide Loader
+//                 const loader = document.getElementById('previewLoadingOverlay');
+//                 if (loader) loader.classList.add('preview-hidden');
+//             });
+//         });
+//     });
+// }
+
+async function openPreview(pdfUrl) {
+    const canvas = document.getElementById('pdfCanvas');
+    const container = document.querySelector('.pdf-scroll-container');
+    const context = canvas.getContext('2d', { alpha: false }); // alpha: false improves performance
+
+    // Show backdrop/loader logic here...
+    document.getElementById('uniquePreviewBackdrop').style.display = 'flex';
 
     const pdfjsLib = window['pdfjsLib'];
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-        pdf.getPage(1).then(page => {
+    try {
+        const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+        const page = await pdf.getPage(1);
 
-            const canvas = document.getElementById('pdfCanvas');
-            const context = canvas.getContext('2d');
-            const container = document.querySelector('.pdf-scroll-container');
+        // --- THE "SECRET SAUCE" FOR CLARITY ---
+        const dpr = window.devicePixelRatio || 1; 
+        const originalViewport = page.getViewport({ scale: 1 });
+        const scale = container.clientWidth / originalViewport.width;
+        const viewport = page.getViewport({ scale: scale * dpr });
 
-            const viewport = page.getViewport({
-                scale: 1
-            });
+        // Set the actual resolution (High-Res)
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
 
-            const scale = container.clientWidth / viewport.width;
-            const scaledViewport = page.getViewport({
-                scale
-            });
+        // Set the display size (Matches Screen)
+        canvas.style.width = container.clientWidth + "px";
+        canvas.style.height = "auto";
 
-            canvas.width = scaledViewport.width;
-            canvas.height = scaledViewport.height;
+        await page.render({
+            canvasContext: context,
+            viewport: viewport,
+            intent: 'display'
+        }).promise;
 
-            page.render({
-                canvasContext: context,
-                viewport: scaledViewport
-            }).promise.then(() => {
-                // ✅ Rendering Complete: Hide Loader
-                const loader = document.getElementById('previewLoadingOverlay');
-                if (loader) loader.classList.add('preview-hidden');
-            });
-        });
-    });
+        document.getElementById('previewLoadingOverlay').classList.add('preview-hidden');
+    } catch (err) {
+        console.error("Render error:", err);
+        document.getElementById('previewLoadingOverlay').classList.add('preview-hidden');
+        document.getElementById('uniquePreviewBackdrop').style.display = 'none'; 
+        alert("Could not load PDF. Please try again.");
+    }
 }
-
 
 
 
