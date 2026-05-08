@@ -1684,7 +1684,7 @@ $(document).ready(function (e) {
                     .then(response => {
                         // 2. Extract the Base64 string from the "base" key
                         // We split at the comma to remove "data:application/pdf;base64,"
-                        // console.log(response);
+                        console.log(response);
 
 
                         // Check if the server actually returned the PDF data
@@ -2281,13 +2281,11 @@ function printPDF() {
     // 3. Write content to the iframe
     const doc = printFrame.contentWindow.document;
     doc.open();
-    // doc.write(`
-    //                     <html>
-    //                         <body style="margin:0;">
-    //                             <img src="${dataUrl}" style="width:100%;" onload="window.print();">
-    //                         </body>
-    //                     </html>
-    //                 `);
+    // doc.write(`<html>
+    //                 <body style="margin:0;">
+    //                     <img src="${dataUrl}" style="width:100%;" onload="window.print();">
+    //                 </body>
+    //             </html>`);
 
     doc.write(`
         <!DOCTYPE html>
@@ -2296,13 +2294,13 @@ function printPDF() {
                 <style>
                     /* Critical: Remove all browser default margins */
                     @page { 
-                        margin: 0; 
+                        margin: 0.01; 
                         size: auto; 
                     }
                     html, body { 
                         margin: 0; 
                         padding: 0; 
-                        width: 100%;
+                        width: 99%;
                     }
                     img { 
                         display: block;
@@ -2331,6 +2329,7 @@ function printPDF() {
         </html>
     `);
     doc.close();
+    
 
     // 4. Optional: Remove the iframe after printing
     printFrame.contentWindow.onafterprint = () => {
