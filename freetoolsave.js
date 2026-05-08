@@ -267,7 +267,7 @@ window.performDocumentAction = function (action) {
         } else {
             const link = document.createElement('a');
             link.href = pdfContent;
-            link.download = (window.downloadPageName.charAt(0).toUpperCase() + downloadPageName.slice(1) + ' '+ window.pdfname  || 'Document') + '.pdf';
+            link.download = (window.downloadPageName.charAt(0).toUpperCase() + downloadPageName.slice(1) + ' ' + window.pdfname || 'Document') + '.pdf';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -382,11 +382,11 @@ closeBtn.addEventListener("click", () => {
         document.body.style.overflow = "";
         document.body.style.paddingRight = "";
     }, 300);
-     
+
     // reset download modal.    
     document.getElementById("downloadForm").reset();
-        
-    
+
+
 });
 // custom js for field
 
@@ -1647,7 +1647,7 @@ $(document).ready(function (e) {
                     "Vertical": "2"
                 }
 
-                //  console.log(estimate_form.customer_due_date);
+                // console.log(estimate_form.customer_due_date);
 
                 // console.log(data);
 
@@ -1744,7 +1744,7 @@ $(document).ready(function (e) {
     });
     // */
 
-   
+
 
     $(".add_product").on('click', function (e) {
         e.preventDefault();
@@ -2128,51 +2128,52 @@ window.onload = function () { }
 // model preview and print pdf .....
 // ---------------------------------------------------------------
 
+/*
+    function openPreview(pdfUrl) {
+        // currentPdfUrl = pdfUrl;
 
-// function openPreview(pdfUrl) {
-//     // currentPdfUrl = pdfUrl;
+        const backdrop = document.getElementById('uniquePreviewBackdrop');
+        const loader = document.getElementById('previewLoadingOverlay');
 
-//     const backdrop = document.getElementById('uniquePreviewBackdrop');
-//     const loader = document.getElementById('previewLoadingOverlay');
+        // Ensure modal is visible and loader is shown
+        if (backdrop) backdrop.style.display = 'flex';
+        if (loader) loader.classList.remove('preview-hidden');
 
-//     // Ensure modal is visible and loader is shown
-//     if (backdrop) backdrop.style.display = 'flex';
-//     if (loader) loader.classList.remove('preview-hidden');
+        const pdfjsLib = window['pdfjsLib'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-//     const pdfjsLib = window['pdfjsLib'];
-//     pdfjsLib.GlobalWorkerOptions.workerSrc =
-//         'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+            pdf.getPage(1).then(page => {
 
-//     pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-//         pdf.getPage(1).then(page => {
+                const canvas = document.getElementById('pdfCanvas');
+                const context = canvas.getContext('2d');
+                const container = document.querySelector('.pdf-scroll-container');
 
-//             const canvas = document.getElementById('pdfCanvas');
-//             const context = canvas.getContext('2d');
-//             const container = document.querySelector('.pdf-scroll-container');
+                const viewport = page.getViewport({
+                    scale: 1
+                });
 
-//             const viewport = page.getViewport({
-//                 scale: 1
-//             });
+                const scale = container.clientWidth / viewport.width;
+                const scaledViewport = page.getViewport({
+                    scale
+                });
 
-//             const scale = container.clientWidth / viewport.width;
-//             const scaledViewport = page.getViewport({
-//                 scale
-//             });
+                canvas.width = scaledViewport.width;
+                canvas.height = scaledViewport.height;
 
-//             canvas.width = scaledViewport.width;
-//             canvas.height = scaledViewport.height;
-
-//             page.render({
-//                 canvasContext: context,
-//                 viewport: scaledViewport
-//             }).promise.then(() => {
-//                 // ✅ Rendering Complete: Hide Loader
-//                 const loader = document.getElementById('previewLoadingOverlay');
-//                 if (loader) loader.classList.add('preview-hidden');
-//             });
-//         });
-//     });
-// }
+                page.render({
+                    canvasContext: context,
+                    viewport: scaledViewport
+                }).promise.then(() => {
+                    // ✅ Rendering Complete: Hide Loader
+                    const loader = document.getElementById('previewLoadingOverlay');
+                    if (loader) loader.classList.add('preview-hidden');
+                });
+            });
+        });
+    }
+*/
 
 async function openPreview(pdfUrl) {
     const canvas = document.getElementById('pdfCanvas');
@@ -2190,7 +2191,7 @@ async function openPreview(pdfUrl) {
         const page = await pdf.getPage(1);
 
         // --- THE "SECRET SAUCE" FOR CLARITY ---
-        const dpr = window.devicePixelRatio || 1; 
+        const dpr = window.devicePixelRatio || 1;
         const originalViewport = page.getViewport({ scale: 1 });
         const scale = container.clientWidth / originalViewport.width;
         const viewport = page.getViewport({ scale: scale * dpr });
@@ -2213,7 +2214,7 @@ async function openPreview(pdfUrl) {
     } catch (err) {
         console.error("Render error:", err);
         document.getElementById('previewLoadingOverlay').classList.add('preview-hidden');
-        document.getElementById('uniquePreviewBackdrop').style.display = 'none'; 
+        document.getElementById('uniquePreviewBackdrop').style.display = 'none';
         alert("Could not load PDF. Please try again.");
     }
 }
@@ -2246,27 +2247,89 @@ function printPDF() {
     }
 
     // 1. Convert canvas to Image
-    const dataUrl = canvas.toDataURL('image/png');
+    const dataUrl = canvas.toDataURL('image/png', 1.0);
 
     // 2. Create a hidden iframe
     let printFrame = document.getElementById('print-helper-frame');
-    if (!printFrame) {
-        printFrame = document.createElement('iframe');
-        printFrame.id = 'print-helper-frame';
-        printFrame.style.display = 'none'; // Keep it hidden
-        document.body.appendChild(printFrame);
+    // if (!printFrame) {
+    //     printFrame = document.createElement('iframe');
+    //     printFrame.id = 'print-helper-frame';
+    //     printFrame.style.display = 'none'; // Keep it hidden
+    //     document.body.appendChild(printFrame);
+    // }
+    if (printFrame) {
+        printFrame.remove();
     }
+
+    printFrame = document.createElement('iframe');
+    printFrame.id = 'print-helper-frame';
+
+    // Inline styling to ensure the iframe itself doesn't trigger layout shifts
+    Object.assign(printFrame.style, {
+        position: 'fixed',
+        right: '0',
+        bottom: '0',
+        width: '0',
+        height: '0',
+        border: '0',
+        zIndex: '-1'
+    });
+
+    document.body.appendChild(printFrame);
+
 
     // 3. Write content to the iframe
     const doc = printFrame.contentWindow.document;
     doc.open();
+    // doc.write(`
+    //                     <html>
+    //                         <body style="margin:0;">
+    //                             <img src="${dataUrl}" style="width:100%;" onload="window.print();">
+    //                         </body>
+    //                     </html>
+    //                 `);
+
     doc.write(`
-                        <html>
-                            <body style="margin:0;">
-                                <img src="${dataUrl}" style="width:100%;" onload="window.print();">
-                            </body>
-                        </html>
-                    `);
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <style>
+                    /* Critical: Remove all browser default margins */
+                    @page { 
+                        margin: 0; 
+                        size: auto; 
+                    }
+                    html, body { 
+                        margin: 0; 
+                        padding: 0; 
+                        width: 100%;
+                    }
+                    img { 
+                        display: block;
+                        width: 100%;
+                        height: auto;
+                        /* Prevent Safari from splitting image across pages */
+                        page-break-inside: avoid;
+                        -webkit-column-break-inside: avoid;
+                        break-inside: avoid;
+                    }
+                </style>
+            </head>
+            <body>
+                <img src="${dataUrl}" id="print-img">
+                <script>
+                    const img = document.getElementById('print-img');
+                    img.onload = function() {
+                        // Small timeout helps Safari's PDFKit/Print engine stabilize
+                        setTimeout(() => {
+                            window.focus();
+                            window.print();
+                        }, 250);
+                    };
+                <\/script>
+            </body>
+        </html>
+    `);
     doc.close();
 
     // 4. Optional: Remove the iframe after printing
