@@ -1023,7 +1023,7 @@ $(document).ready(function (e) {
                             "selectedregularfontstyle": "/pdf_fonts/arial/arial_regular.txt"
                         },
                         "T_Termsandcondition": 1,
-                        "AmountDue": 1,
+                        "AmountDue": 0,
                         "C_Phone": 1,
                         "PDF_Page_Number_alignment": 2,
                         "Sign_Date_Format": "1",
@@ -1530,7 +1530,7 @@ $(document).ready(function (e) {
                         "table_cal": {
                             "qty_label": "Qty",
                             "deposit_label": "Deposit",
-                            "amountpaid_value": 0,
+                            "amountpaid_value": '',
                             "task_quantity_label": "Quantity",
                             "total_cost_label": "Total",
                             "amountdue_label": "Amount Due",
@@ -1544,7 +1544,7 @@ $(document).ready(function (e) {
                             "sub_total_value": `${estimate_form["sub_total[]"] ?? 0}`,
                             "deposit_ratio": "20",
                             "discount_ratio": "10.0000%",
-                            "amountdue_value": `${estimate_form["sub_amout_due[]"] ?? 0}`,
+                            "amountdue_value": '',
                             "discount_on_value": `${estimate_form["total_with_tax_and_price[]"] ?? 0}`,
                             "discount_on_header": "on",
                             "depositdue_value": 0,
@@ -1552,7 +1552,7 @@ $(document).ready(function (e) {
                             "amountpaid_label": "Amount Paid",
                             "single_total_label": "Total Quantity",
                             "return_order_label": "Return Order",
-                            "return_order_value": 1500,
+                            "return_order_value": '',
                             "table_cal_style": {
                                 "font_size": 9
                             },
