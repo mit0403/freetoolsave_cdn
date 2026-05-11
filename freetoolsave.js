@@ -656,9 +656,9 @@ $(document).ready(function (e) {
                                 default_currecy = val.symbol;
                                 selected = "selected";
                             }
-                            window.curr_symbol =  val.symbol ?? 'USD';
+                            window.curr_symbol = val.symbol ?? 'USD';
                             $("#customer_currency").append('<option value="' + val
-                                .currencylocale + '" ' + selected + ' data-symbol="' +  curr_symbol + '">' + val.currency_name + '</option>');
+                                .currencylocale + '" ' + selected + ' data-symbol="' + curr_symbol + '">' + val.currency_name + '</option>');
                             // $("#customer_currency").append("<option value='"+ val.symbol +"' "+ if(val.symbol == '$') { "selected" } +" >"+val.currency_name +"</option>");
                         }
                     });
@@ -952,7 +952,8 @@ $(document).ready(function (e) {
 
                 const estimate_form = JSON.parse(localStorage.getItem('estimate_form'));
 
-                $('.preview-pdf').text(estimate_form.customer_invoice);     // to change pdf title dynamically.
+                // text of modal.
+                $('.preview-pdf').text(page_name.charAt(0).toUpperCase() + page_name.slice(1).toLowerCase() + "# " + estimate_form.customer_invoice + ".pdf");     // to change pdf title dynamically.
 
                 window.pdfname = estimate_form.customer_invoice;
 
@@ -1228,7 +1229,7 @@ $(document).ready(function (e) {
                             }],
                             "invoice_total": estimate_form["total_with_tax_and_price[]"] ?? 0,
                             // date title 
-                            "invoice_date_label": page_name.charAt(0).toUpperCase() + page_name.slice(1) + " date" ,
+                            "invoice_date_label": page_name.charAt(0).toUpperCase() + page_name.slice(1) + " date",
                             "invoice_po_number": "",
                             "invoice_number": estimate_form.customer_invoice ?? 1,
                             "invoice_duedate": estimate_form.customer_due_date ?? '',
@@ -1263,7 +1264,7 @@ $(document).ready(function (e) {
                         "pin_code": "",
                         // curruncy
                         // "selected_currency": (estimate_form.customer_currency) ? estimate_form.customer_currency : "₹",
-                        "selected_currency": window.currency_symbol ,
+                        "selected_currency": window.currency_symbol,
                         "mobile_no": "",
 
                         // business email.
@@ -1685,7 +1686,7 @@ $(document).ready(function (e) {
                     .then(response => {
                         // 2. Extract the Base64 string from the "base" key
                         // We split at the comma to remove "data:application/pdf;base64,"
-                        // console.log(response);
+                        console.log(response);
 
 
                         // Check if the server actually returned the PDF data
@@ -2176,61 +2177,89 @@ window.onload = function () { }
     }
 */
 
-async function openPreview(pdfUrl) {
-    const canvas = document.getElementById('pdfCanvas');
-    const container = document.querySelector('.pdf-scroll-container');
-    const context = canvas.getContext('2d', { alpha: false }); // alpha: false improves performance
 
-    // Show backdrop/loader logic here...
+
+
+async function openPreview(pdfUrl) {
+    const container = document.querySelector('.pdf-scroll-container');
+    if (!container) return;
+
+    // Clear existing preview
+    container.innerHTML = '';
+
+    // Show backdrop/loader
     document.getElementById('uniquePreviewBackdrop').style.display = 'flex';
+    const loader = document.getElementById('previewLoadingOverlay');
+    if (loader) loader.classList.remove('preview-hidden');
 
     const pdfjsLib = window['pdfjsLib'];
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
     try {
         const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
-        const page = await pdf.getPage(1);
 
-        // --- THE "SECRET SAUCE" FOR CLARITY ---
-        const dpr = window.devicePixelRatio || 1;
-        const originalViewport = page.getViewport({ scale: 1 });
-        const scale = container.clientWidth / originalViewport.width;
-        const viewport = page.getViewport({ scale: scale * dpr });
+        // Loop through all pages to show multi-page PDFs
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
 
-        // Set the actual resolution (High-Res)
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+            // --- OPTIMIZED RENDERING FOR MOBILE ---
+            // Limit DPR to 2.0 to prevent memory crashes on high-res mobile devices
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const originalViewport = page.getViewport({ scale: 1 });
 
-        // Set the display size (Matches Screen)
-        canvas.style.width = container.clientWidth + "px";
-        canvas.style.height = "auto";
+            // Calculate scale based on container width
+            const containerWidth = container.clientWidth - 40; // Subtract padding/margin
+            const scale = containerWidth / originalViewport.width;
+            const viewport = page.getViewport({ scale: scale * dpr });
 
-        await page.render({
-            canvasContext: context,
-            viewport: viewport,
-            intent: 'display'
-        }).promise;
+            // Create and setup canvas for each page
+            const canvas = document.createElement('canvas');
+            canvas.className = 'pdf-page-canvas';
+            canvas.style.display = 'block';
+            canvas.style.margin = '10px auto';
+            canvas.style.boxShadow = '0 4px 15px rgba(0,0,0,0.15)';
 
-        document.getElementById('previewLoadingOverlay').classList.add('preview-hidden');
+            const context = canvas.getContext('2d', { alpha: false });
+
+            // Set actual resolution (High-Res but clamped)
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            // Set display size (Matches Screen)
+            canvas.style.width = containerWidth + "px";
+            canvas.style.height = "auto";
+
+            container.appendChild(canvas);
+
+            await page.render({
+                canvasContext: context,
+                viewport: viewport,
+                intent: 'display'
+            }).promise;
+        }
+
+        if (loader) loader.classList.add('preview-hidden');
     } catch (err) {
         console.error("Render error:", err);
-        document.getElementById('previewLoadingOverlay').classList.add('preview-hidden');
+        if (loader) loader.classList.add('preview-hidden');
         document.getElementById('uniquePreviewBackdrop').style.display = 'none';
         alert("Could not load PDF. Please try again.");
     }
 }
 
-
-
 function closePreview() {
     const backdrop = document.getElementById('uniquePreviewBackdrop');
     if (backdrop) backdrop.style.display = 'none';
 
-    // ✅ Reset loader for next time
+    // Reset loader for next time
     const loader = document.getElementById('previewLoadingOverlay');
     if (loader) loader.classList.remove('preview-hidden');
 
-    // code to enable the save link.
+    // Clear canvases to free memory immediately
+    const container = document.querySelector('.pdf-scroll-container');
+    if (container) container.innerHTML = '';
+
+    // Enable the save button if it was in loading state
     if ($("#instantSaveBtn").hasClass('is-loading')) {
         $("#instantSaveBtn").removeClass('is-loading').css({
             'pointer-events': 'auto',
@@ -2239,104 +2268,59 @@ function closePreview() {
     }
 }
 
-
 function printPDF() {
-    const canvas = document.getElementById('pdfCanvas');
-    if (!canvas) {
-        console.error("Canvas not found");
+    const container = document.querySelector('.pdf-scroll-container');
+    const canvases = container ? container.querySelectorAll('canvas') : [];
+
+    if (canvases.length === 0) {
+        console.error("No pages found to print");
         return;
     }
 
-    // 1. Convert canvas to Image
-    const dataUrl = canvas.toDataURL('image/png', 1.0);
-
-    // 2. Create a hidden iframe
+    // Create a hidden iframe for printing
     let printFrame = document.getElementById('print-helper-frame');
-    // if (!printFrame) {
-    //     printFrame = document.createElement('iframe');
-    //     printFrame.id = 'print-helper-frame';
-    //     printFrame.style.display = 'none'; // Keep it hidden
-    //     document.body.appendChild(printFrame);
-    // }
     if (printFrame) {
         printFrame.remove();
     }
 
     printFrame = document.createElement('iframe');
     printFrame.id = 'print-helper-frame';
-
-    // Inline styling to ensure the iframe itself doesn't trigger layout shifts
-    Object.assign(printFrame.style, {
-        position: 'fixed',
-        right: '0',
-        bottom: '0',
-        width: '0',
-        height: '0',
-        border: '0',
-        zIndex: '-1'
-    });
-
+    printFrame.style.position = 'fixed';
+    printFrame.style.right = '0';
+    printFrame.style.bottom = '0';
+    printFrame.style.width = '0';
+    printFrame.style.height = '0';
+    printFrame.style.border = '0';
     document.body.appendChild(printFrame);
 
-
-    // 3. Write content to the iframe
     const doc = printFrame.contentWindow.document;
     doc.open();
-    // doc.write(`<html>
-    //                 <body style="margin:0;">
-    //                     <img src="${dataUrl}" style="width:100%;" onload="window.print();">
-    //                 </body>
-    //             </html>`);
+    doc.write('<html><head><title>Print PDF</title>');
+    // Style for multi-page print layout
+    doc.write('<style>body{margin:0;padding:0;} img{display:block;width:100%;page-break-after:always;} img:last-child{page-break-after:avoid;}</style>');
+    doc.write('</head><body>');
 
-    doc.write(`
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <style>
-                    /* Critical: Remove all browser default margins */
-                    @page { 
-                        margin: 0.01; 
-                        size: auto; 
-                    }
-                    html, body { 
-                        margin: 0; 
-                        padding: 0; 
-                        width: 99%;
-                    }
-                    img { 
-                        display: block;
-                        width: 100%;
-                        height: auto;
-                        /* Prevent Safari from splitting image across pages */
-                        page-break-inside: avoid;
-                        -webkit-column-break-inside: avoid;
-                        break-inside: avoid;
-                    }
-                </style>
-            </head>
-            <body>
-                <img src="${dataUrl}" id="print-img">
-                <script>
-                    const img = document.getElementById('print-img');
-                    img.onload = function() {
-                        // Small timeout helps Safari's PDFKit/Print engine stabilize
-                        setTimeout(() => {
-                            window.focus();
-                            window.print();
-                        }, 250);
-                    };
-                <\/script>
-            </body>
-        </html>
-    `);
+    canvases.forEach((canvas) => {
+        const dataUrl = canvas.toDataURL('image/png', 1.0);
+        doc.write(`<img src="${dataUrl}" />`);
+    });
+
+    doc.write('</body></html>');
     doc.close();
-    
 
-    // 4. Optional: Remove the iframe after printing
-    printFrame.contentWindow.onafterprint = () => {
-        document.body.removeChild(printFrame);
-    };
+    // Trigger print
+    printFrame.contentWindow.focus();
+    setTimeout(() => {
+        printFrame.contentWindow.print();
+        // Remove frame after a delay to allow print dialog to initialize
+        setTimeout(() => {
+            if (printFrame.parentNode) {
+                printFrame.parentNode.removeChild(printFrame);
+            }
+        }, 1000);
+    }, 500);
 }
+
 
 
 
