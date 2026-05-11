@@ -656,9 +656,9 @@ $(document).ready(function (e) {
                                 default_currecy = val.symbol;
                                 selected = "selected";
                             }
+                            window.curr_symbol =  val.symbol ?? 'USD';
                             $("#customer_currency").append('<option value="' + val
-                                .currencylocale + '" ' + selected + ' data-symbol="' + val
-                                    .symbol + '">' + val.currency_name + '</option>');
+                                .currencylocale + '" ' + selected + ' data-symbol="' +  curr_symbol + '">' + val.currency_name + '</option>');
                             // $("#customer_currency").append("<option value='"+ val.symbol +"' "+ if(val.symbol == '$') { "selected" } +" >"+val.currency_name +"</option>");
                         }
                     });
@@ -699,7 +699,7 @@ $(document).ready(function (e) {
 
 
     $('body').on('change', function () {
-        currency_symbol = $("#customer_currency").find(':selected').data('symbol');
+        window.currency_symbol = $("#customer_currency").find(':selected').data('symbol');
         $(".add_symbol").text(currency_symbol);
     });
     // $('.add_symbol').text(currency_symbol);
@@ -1262,7 +1262,8 @@ $(document).ready(function (e) {
                         },
                         "pin_code": "",
                         // curruncy
-                        "selected_currency": (estimate_form.customer_currency) ? estimate_form.customer_currency : "₹",
+                        // "selected_currency": (estimate_form.customer_currency) ? estimate_form.customer_currency : "₹",
+                        "selected_currency": window.currency_symbol ,
                         "mobile_no": "",
 
                         // business email.
@@ -1684,7 +1685,7 @@ $(document).ready(function (e) {
                     .then(response => {
                         // 2. Extract the Base64 string from the "base" key
                         // We split at the comma to remove "data:application/pdf;base64,"
-                        console.log(response);
+                        // console.log(response);
 
 
                         // Check if the server actually returned the PDF data
