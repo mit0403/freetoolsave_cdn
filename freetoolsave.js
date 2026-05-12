@@ -267,7 +267,7 @@ window.performDocumentAction = function (action) {
         } else {
             const link = document.createElement('a');
             link.href = pdfContent;
-            link.download = (window.downloadPageName.charAt(0).toUpperCase() + downloadPageName.slice(1) + ' ' + window.pdfname || 'Document') + '.pdf';
+            link.download = (window.downloadPageName.charAt(0).toUpperCase() + downloadPageName.slice(1) + '# ' + window.pdfname || 'Document') + '.pdf';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1686,7 +1686,7 @@ $(document).ready(function (e) {
                     .then(response => {
                         // 2. Extract the Base64 string from the "base" key
                         // We split at the comma to remove "data:application/pdf;base64,"
-                        console.log(response);
+                      
 
 
                         // Check if the server actually returned the PDF data
