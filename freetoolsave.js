@@ -700,7 +700,7 @@ $(document).ready(function (e) {
 
     $('body').on('change', function () {
         window.currency_symbol = $("#customer_currency").find(':selected').data('symbol');
-        $(".add_symbol").text(currency_symbol);
+        $(".add_symbol").text(window.currency_symbol);
     });
     // $('.add_symbol').text(currency_symbol);
 
