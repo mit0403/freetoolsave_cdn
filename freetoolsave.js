@@ -952,8 +952,13 @@ $(document).ready(function (e) {
 
                 const estimate_form = JSON.parse(localStorage.getItem('estimate_form'));
 
-                // text of modal.
-                $('.preview-pdf').text(page_name.charAt(0).toUpperCase() + page_name.slice(1).toLowerCase() + "# " + estimate_form.customer_invoice + ".pdf");     // to change pdf title dynamically.
+                // text of modal-title.
+                if (page_name == 'purchase Order') {
+                    $('.preview-pdf').text("P.O.# " + estimate_form.customer_invoice + ".pdf");
+                }
+                else {
+                    $('.preview-pdf').text(page_name.charAt(0).toUpperCase() + page_name.slice(1).toLowerCase() + "# " + estimate_form.customer_invoice + ".pdf");     // to change pdf title dynamically.
+                }
 
                 window.pdfname = estimate_form.customer_invoice;
 
@@ -1686,7 +1691,7 @@ $(document).ready(function (e) {
                     .then(response => {
                         // 2. Extract the Base64 string from the "base" key
                         // We split at the comma to remove "data:application/pdf;base64,"
-                      
+                        
 
 
                         // Check if the server actually returned the PDF data
