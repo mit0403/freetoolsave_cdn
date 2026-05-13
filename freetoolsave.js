@@ -3,6 +3,7 @@
 //--------------------------------------------------------------
 
 let template_design = 1;        // default standard.. 
+let isInstantSaveCancelled = false; 
 
 // ID-to-Number Mapping
 const TEMPLATE_MAP = {
@@ -644,7 +645,7 @@ $(document).ready(function (e) {
         url: webapp_url + 'get_currencies_public',
         type: "POST",
         success: function (data) {
-            console.log(data);
+            // console.log(data);
             try {
                 var jss = typeof data === 'string' ? JSON.parse(data) : data;
                 if (jss && jss.data) {
@@ -817,9 +818,8 @@ $(document).ready(function (e) {
     // my code-- meet
     $("#instantSaveBtn").on('click', async function (e) {
         e.preventDefault();
+        isInstantSaveCancelled = false;
         lockInvTplScroll();
-
-
         
         const $link = $(this);
 
@@ -843,6 +843,12 @@ $(document).ready(function (e) {
                 const loader = document.getElementById('previewLoadingOverlay');
                 if (backdrop) backdrop.style.display = 'flex';
                 if (loader) loader.classList.remove('preview-hidden');
+
+                // Disable print/download/watermark while loading
+                $("#download-modal-trigger, #print-modal-trigger, .remove_watermark").css({
+                    'pointer-events': 'none',
+                    'opacity': '0.5'
+                });
 
                 $('.companylogo_er').text('');
 
@@ -946,6 +952,8 @@ $(document).ready(function (e) {
 
                 // get base64 logo
                 const base64Logo = await getImageData();
+                if (isInstantSaveCancelled) return; 
+
                 if (base64Logo != {}) {
                     obj['companylogo'] = base64Logo;
                 }
@@ -966,7 +974,7 @@ $(document).ready(function (e) {
                 window.pdfname = estimate_form.customer_invoice;
                 window.totaltaxamount = 0;
 
-                console.log(estimate_form);
+                // console.log(estimate_form);
 
 
                 const data = {
@@ -1961,7 +1969,7 @@ $(document).ready(function (e) {
                     "Vertical": "2"
                 }
 
-                console.log(estimate_form.customer_due_date);
+                // console.log(estimate_form.customer_due_date);
 
                 // console.log(data);
 
@@ -1974,7 +1982,7 @@ $(document).ready(function (e) {
                     binaryString += String.fromCharCode(utf8Bytes[i]);
                 }
                 const base64Data = btoa(binaryString);
-                console.log("Base64 string generated safely.", base64Data);
+                console.log("Base64 string generated safely.");
                 // const parse_data = JSON.parse(localStorage.getItem('estimate_form'));
 
 
@@ -1992,13 +2000,15 @@ $(document).ready(function (e) {
                     // error comes here,... 
                     // .then(res => res.json()) // 1. Read the response as JSON text
                     .then(res => {
+                        if (isInstantSaveCancelled) throw new Error("cancelled");
                         if (!res.ok) throw new Error("Network response was not ok");
                         return res.json(); // Correctly returning the promise
                     })
                     .then(response => {
+                        if (isInstantSaveCancelled) return; 
                         // 2. Extract the Base64 string from the "base" key
                         // We split at the comma to remove "data:application/pdf;base64,"
-                        console.log(response);
+                        // console.log(response);
 
 
                         // Check if the server actually returned the PDF data
@@ -2020,6 +2030,8 @@ $(document).ready(function (e) {
 
                             // 4. Create a local URL for the PDF
                             const pdfUrl = URL.createObjectURL(pdfBlob);
+                            
+                            if (isInstantSaveCancelled) return; 
                             openPreview(pdfUrl);
                             window.pdfContent = pdfUrl;
 
@@ -2032,6 +2044,7 @@ $(document).ready(function (e) {
 
                     })
                     .catch(err => {
+                        if (err.message === "cancelled") return;
                         console.error("Failed to process PDF:", err);
                         alert("Could not generate PDF. Check console for details.");
                     });
@@ -2510,11 +2523,19 @@ async function openPreview(pdfUrl) {
     const pdfjsLib = window['pdfjsLib'];
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+    // Disable print/download/watermark while loading (redundant but safe)
+    $("#download-modal-trigger, #print-modal-trigger, .remove_watermark").css({
+        'pointer-events': 'none',
+        'opacity': '0.5'
+    });
+
     try {
         const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+        if (isInstantSaveCancelled) return; 
 
         // Loop through all pages to show multi-page PDFs
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            if (isInstantSaveCancelled) return; 
             const page = await pdf.getPage(pageNum);
 
             // --- OPTIMIZED RENDERING FOR MOBILE ---
@@ -2554,16 +2575,37 @@ async function openPreview(pdfUrl) {
         }
 
         if (loader) loader.classList.add('preview-hidden');
+
+        // Enable print/download/watermark after loading completely
+        $("#download-modal-trigger, #print-modal-trigger, .remove_watermark").css({
+            'pointer-events': 'auto',
+            'opacity': '1'
+        });
+
     } catch (err) {
         console.error("Render error:", err);
         if (loader) loader.classList.add('preview-hidden');
         document.getElementById('uniquePreviewBackdrop').style.display = 'none';
+        
+        // Enable print/download/watermark on error
+        $("#download-modal-trigger, #print-modal-trigger, .remove_watermark").css({
+            'pointer-events': 'auto',
+            'opacity': '1'
+        });
+
         alert("Could not load PDF. Please try again.");
     }
 }
 
 function closePreview() {
     
+    isInstantSaveCancelled = true; 
+
+    // Enable print/download/watermark for next time
+    $("#download-modal-trigger, #print-modal-trigger, .remove_watermark").css({
+        'pointer-events': 'auto',
+        'opacity': '1'
+    });
 
 
     const backdrop = document.getElementById('uniquePreviewBackdrop');
