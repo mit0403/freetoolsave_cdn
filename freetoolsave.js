@@ -965,10 +965,10 @@ $(document).ready(function (e) {
 
                 // text of modal-title.
                 if (page_name == 'purchase Order') {
-                    $('.preview-pdf').text("P.O.# " + estimate_form.customer_invoice + ".pdf");
+                    $('.preview-pdf').text("P.O.# " + estimate_form.customer_invoice );
                 }
                 else {
-                    $('.preview-pdf').text(page_name.charAt(0).toUpperCase() + page_name.slice(1).toLowerCase() + "# " + estimate_form.customer_invoice + ".pdf");     // to change pdf title dynamically.
+                    $('.preview-pdf').text(page_name.charAt(0).toUpperCase() + page_name.slice(1).toLowerCase() + "# " + estimate_form.customer_invoice );     // to change pdf title dynamically.
                 }
 
                 window.pdfname = estimate_form.customer_invoice;
