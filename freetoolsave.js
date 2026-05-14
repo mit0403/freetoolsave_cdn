@@ -1314,7 +1314,7 @@ $(document).ready(function (e) {
                         // billing data.
                         "bill_from_address": {
                             "address_label": "From",
-                            "street_1": '',
+                            "street_1": estimate_form.business_address,
                             "street_2": '',
                             "city": '',
                             "state": '',
