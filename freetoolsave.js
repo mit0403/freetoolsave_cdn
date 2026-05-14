@@ -1314,7 +1314,7 @@ $(document).ready(function (e) {
                         // billing data.
                         "bill_from_address": {
                             "address_label": "From",
-                            "street_1": estimate_form.business_address,
+                            "street_1": '',
                             "street_2": '',
                             "city": '',
                             "state": '',
@@ -1907,7 +1907,7 @@ $(document).ready(function (e) {
                         "background_image_height": 0,
                         "background_image": "https://www.mooninvoice.com/public/pdf_template/default.png",
                         "maxdecimaldigit": 2,
-                        "street_1": "",
+                        "street_1": estimate_form.business_address,
                         "street_2": "",
                         "Signature": {
                             "Signature_2_image": "",
